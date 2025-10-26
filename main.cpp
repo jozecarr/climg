@@ -1,12 +1,17 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 #include <iostream>
-#include <windows.h>
 #include <clocale>
-#include "console_size.h" 
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>    // strtof
+#include "console_size.h"
+
+#if defined(_WIN32)
+  #include <windows.h>
+#endif
 
 struct pixel {
     int r, g, b;
@@ -15,7 +20,6 @@ struct pixel {
 const char* palette[] = { " ", u8"░", u8"▒", u8"▓", u8"█" };
 constexpr int palLen = sizeof(palette) / sizeof(palette[0]);
 
-//to calculate luminance of a pixel
 static inline float srgbToLinear(float c) {
     return (c <= 0.04045f) ? (c / 12.92f) : std::pow((c + 0.055f) / 1.055f, 2.4f);
 }
@@ -57,13 +61,15 @@ int main(int argc, char** argv) {
         } else {std::cout << "Exposure must be float > 0 (e.g. \"1.2\", \"4\", default is 3)" << "\n";} 
     }
     
+#if defined(_WIN32)
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
+#endif
     std::setlocale(LC_ALL, ".UTF-8");
 
     int width, height, actualChannels;
     const int requiredChannels = 3;
-    unsigned char* data = stbi_load("image.jpg", &width, &height, &actualChannels, requiredChannels);
+    unsigned char* data = stbi_load(image_path, &width, &height, &actualChannels, requiredChannels);
 
     if (!data) {
         std::cerr << "Failed to load image" << std::endl;

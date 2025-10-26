@@ -4,12 +4,18 @@
 
 struct ConsoleSize { int cols; int rows; };
 
+#if defined(_WIN32)
+  #define NOMINMAX
+  #include <windows.h>
+#else
+  #include <sys/ioctl.h>
+  #include <unistd.h>
+#endif
+
 inline ConsoleSize get_console_size() {
     ConsoleSize out{80, 30}; // reasonable default
 
 #if defined(_WIN32)
-    #include <windows.h>
-
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
 
@@ -20,9 +26,6 @@ inline ConsoleSize get_console_size() {
     return {columns,rows};
     
 #else
-    #include <sys/ioctl.h>
-    #include <unistd.h>
-
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
